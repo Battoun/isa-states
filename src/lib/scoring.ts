@@ -83,7 +83,9 @@ export function computeScores(
       if (state.capitalCorrect) points += POINTS_PER_ANSWER;
       if (state.populationCorrect) points += POINTS_PER_ANSWER;
       state.points = points;
-      if (points === MAX_POINTS_PER_STATE) score.statesCompleted += 1;
+      const quizFinished =
+        state.capitalCorrect !== null && state.populationCorrect !== null;
+      if (quizFinished) score.statesCompleted += 1;
     }
   }
 

@@ -1,7 +1,14 @@
 import { requireUser } from "@/lib/auth";
-import { computeScores, MAX_POINTS_PER_STATE } from "@/lib/scoring";
+import {
+  computeScores,
+  MAX_POINTS_PER_STATE,
+  MAX_QUIZ_POINTS_PER_STATE,
+  POINTS_PER_ANSWER,
+  POINTS_PER_PLATE,
+} from "@/lib/scoring";
 import type { PlateRow, ProfileRow, QuizAnswerRow, StateRow } from "@/types/database";
 import ProgressBar from "@/components/ProgressBar";
+import MiniLeaderboard from "@/components/MiniLeaderboard";
 
 export default async function LeaderboardPage() {
   const { supabase, user } = await requireUser();
@@ -32,6 +39,29 @@ export default async function LeaderboardPage() {
       },
     }))
     .sort((a, b) => b.score.totalPoints - a.score.totalPoints);
+
+  const plateRanking = [...ranking]
+    .sort((a, b) => b.score.platePoints - a.score.platePoints)
+    .map(({ profile, score }) => ({
+      id: profile.id,
+      username: profile.username,
+      points: score.platePoints,
+      count: score.platePoints / POINTS_PER_PLATE,
+      isCurrentUser: profile.id === user.id,
+    }));
+
+  const quizRanking = [...ranking]
+    .sort((a, b) => b.score.quizPoints - a.score.quizPoints)
+    .map(({ profile, score }) => ({
+      id: profile.id,
+      username: profile.username,
+      points: score.quizPoints,
+      count: score.quizPoints / POINTS_PER_ANSWER,
+      isCurrentUser: profile.id === user.id,
+    }));
+
+  const maxPlatePoints = states.length * POINTS_PER_PLATE;
+  const maxQuizPoints = states.length * MAX_QUIZ_POINTS_PER_STATE;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -80,6 +110,28 @@ export default async function LeaderboardPage() {
         {ranking.length === 0 && (
           <p className="text-sm text-slate-400">Personne ne s&apos;est encore inscrit.</p>
         )}
+      </div>
+
+      <h2 className="mt-10 text-lg font-bold text-slate-50">Détail par catégorie</h2>
+      <p className="mt-1 text-sm text-slate-400">
+        Le classement total se décompose en points plaques et points quiz.
+      </p>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <MiniLeaderboard
+          title="🏁 Classement plaques"
+          maxPoints={maxPlatePoints}
+          totalCount={states.length}
+          countLabel="plaques"
+          entries={plateRanking}
+        />
+        <MiniLeaderboard
+          title="🧠 Classement quiz"
+          maxPoints={maxQuizPoints}
+          totalCount={states.length * 2}
+          countLabel="bonnes réponses"
+          entries={quizRanking}
+        />
       </div>
     </div>
   );

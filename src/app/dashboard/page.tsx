@@ -61,6 +61,10 @@ export default async function DashboardPage() {
             par toi, pendant le roadtrip.
           </li>
           <li>
+            🔁 Pas d&apos;échange de photos entre joueurs : chacun doit prendre sa
+            propre photo de chaque plaque, pas celle d&apos;un autre participant.
+          </li>
+          <li>
             ✅ Chaque photo est vérifiée par un admin avant de valider les 50 points.
             Si elle est refusée, tu peux en reprendre une nouvelle.
           </li>
