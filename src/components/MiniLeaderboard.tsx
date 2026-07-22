@@ -2,7 +2,7 @@ interface MiniLeaderboardEntry {
   id: string;
   username: string;
   points: number;
-  count: number;
+  count?: number;
   isCurrentUser: boolean;
 }
 
@@ -15,8 +15,8 @@ export default function MiniLeaderboard({
 }: {
   title: string;
   maxPoints: number;
-  totalCount: number;
-  countLabel: string;
+  totalCount?: number;
+  countLabel?: string;
   entries: MiniLeaderboardEntry[];
 }) {
   return (
@@ -49,9 +49,11 @@ export default function MiniLeaderboard({
               <span className="block font-semibold">
                 {entry.points}/{maxPoints}
               </span>
-              <span className="block text-[11px] font-normal text-slate-500">
-                {entry.count}/{totalCount} {countLabel}
-              </span>
+              {entry.count !== undefined && totalCount !== undefined && countLabel && (
+                <span className="block text-[11px] font-normal text-slate-500">
+                  {entry.count}/{totalCount} {countLabel}
+                </span>
+              )}
             </span>
           </li>
         ))}

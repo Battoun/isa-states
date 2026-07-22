@@ -7,6 +7,13 @@ import {
   POINTS_PER_PLATE,
 } from "@/lib/scoring";
 import type { PlateRow, ProfileRow, QuizAnswerRow, StateRow } from "@/types/database";
+import {
+  computeRarityMap,
+  RARITY_EMOJI,
+  RARITY_LABEL,
+  RARITY_ORDER,
+  type Rarity,
+} from "@/lib/geo";
 import ProgressBar from "@/components/ProgressBar";
 import MiniLeaderboard from "@/components/MiniLeaderboard";
 
@@ -62,6 +69,46 @@ export default async function LeaderboardPage() {
 
   const maxPlatePoints = states.length * POINTS_PER_PLATE;
   const maxQuizPoints = states.length * MAX_QUIZ_POINTS_PER_STATE;
+
+  const rarityMap = computeRarityMap(states);
+
+  const tierTotals: Record<Rarity, number> = {
+    commun: 0,
+    rare: 0,
+    tres_rare: 0,
+    legendaire: 0,
+  };
+  for (const state of states) {
+    tierTotals[rarityMap[state.code].rarity] += 1;
+  }
+
+  const tierCountsByUser: Record<string, Record<Rarity, number>> = {};
+  for (const plate of plates) {
+    if (plate.status !== "approved") continue;
+    const tier = rarityMap[plate.state_code]?.rarity;
+    if (!tier) continue;
+    if (!tierCountsByUser[plate.user_id]) {
+      tierCountsByUser[plate.user_id] = {
+        commun: 0,
+        rare: 0,
+        tres_rare: 0,
+        legendaire: 0,
+      };
+    }
+    tierCountsByUser[plate.user_id][tier] += 1;
+  }
+
+  const rarityRankings = RARITY_ORDER.map((tier) => ({
+    tier,
+    entries: [...ranking]
+      .map(({ profile }) => ({
+        id: profile.id,
+        username: profile.username,
+        points: tierCountsByUser[profile.id]?.[tier] ?? 0,
+        isCurrentUser: profile.id === user.id,
+      }))
+      .sort((a, b) => b.points - a.points),
+  }));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -132,6 +179,23 @@ export default async function LeaderboardPage() {
           countLabel="bonnes réponses"
           entries={quizRanking}
         />
+      </div>
+
+      <h2 className="mt-10 text-lg font-bold text-slate-50">Classement par rareté</h2>
+      <p className="mt-1 text-sm text-slate-400">
+        Qui a mis la main sur le plus de plaques validées de chaque niveau de
+        rareté.
+      </p>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {rarityRankings.map(({ tier, entries }) => (
+          <MiniLeaderboard
+            key={tier}
+            title={`${RARITY_EMOJI[tier]} ${RARITY_LABEL[tier]}`}
+            maxPoints={tierTotals[tier]}
+            entries={entries}
+          />
+        ))}
       </div>
     </div>
   );

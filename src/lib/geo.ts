@@ -18,6 +18,13 @@ export const RARITY_STYLE: Record<Rarity, string> = {
   legendaire: "bg-amber-500/15 text-amber-400",
 };
 
+export const RARITY_EMOJI: Record<Rarity, string> = {
+  commun: "⚪",
+  rare: "🔵",
+  tres_rare: "🟣",
+  legendaire: "🟡",
+};
+
 // Approximate coordinates of each state capital, used only to rank states by
 // distance from the current leg of the roadtrip (Las Vegas hub: CA/AZ/UT/NV).
 const STATE_COORDS: Record<string, { lat: number; lng: number }> = {

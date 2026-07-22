@@ -33,10 +33,16 @@ export default function StateCard({
     (progress.capitalCorrect !== null ? 1 : 0) +
     (progress.populationCorrect !== null ? 1 : 0);
 
+  const needsQuiz = progress.plateStatus === "approved" && quizAnswered < 2;
+
   return (
     <Link
       href={`/states/${code}`}
-      className={`flex flex-col gap-2 rounded-xl border p-3 transition hover:border-sky-500/60 hover:bg-slate-800/40 ${STATUS_STYLES[progress.plateStatus]}`}
+      className={`flex flex-col gap-2 rounded-xl border p-3 transition hover:border-sky-500/60 hover:bg-slate-800/40 ${
+        needsQuiz
+          ? "border-amber-400 bg-amber-500/10 ring-2 ring-amber-400/60 ring-offset-2 ring-offset-slate-950"
+          : STATUS_STYLES[progress.plateStatus]
+      }`}
     >
       <div className="flex items-start justify-between">
         <div className="min-w-0">
@@ -52,7 +58,9 @@ export default function StateCard({
           {progress.points}/{MAX_POINTS_PER_STATE}
         </span>
       </div>
-      <p className="text-xs text-slate-400">{STATUS_LABEL[progress.plateStatus]}</p>
+      <p className={`text-xs ${needsQuiz ? "font-semibold text-amber-400" : "text-slate-400"}`}>
+        {needsQuiz ? "⚠️ Quiz à faire !" : STATUS_LABEL[progress.plateStatus]}
+      </p>
       <div className="mt-auto flex gap-1">
         {[0, 1].map((i) => {
           const correct = i === 0 ? progress.capitalCorrect : progress.populationCorrect;
