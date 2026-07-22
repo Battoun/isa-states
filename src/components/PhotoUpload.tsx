@@ -35,10 +35,12 @@ export default function PhotoUpload({
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
 
-  const canUpload = !plate || plate.status === "rejected";
+  const isApproved = plate?.status === "approved";
+  const canEdit = !plate || !isApproved;
 
   async function handleFile(file: File) {
     setError(null);
@@ -86,6 +88,32 @@ export default function PhotoUpload({
     }
   }
 
+  async function handleDelete() {
+    if (!plate) return;
+    if (!window.confirm("Supprimer cette photo ? Tu devras en reprendre une nouvelle."))
+      return;
+
+    setError(null);
+    setDeleting(true);
+    try {
+      await supabase.storage.from("plates").remove([plate.photo_path]);
+      const { error: deleteError } = await supabase
+        .from("plates")
+        .delete()
+        .eq("id", plate.id);
+      if (deleteError) throw deleteError;
+
+      setLocalPreview(null);
+      router.refresh();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Échec de la suppression."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const badge = plate ? STATUS_BADGE[plate.status] : null;
   const displayUrl = localPreview ?? photoUrl;
 
@@ -112,8 +140,8 @@ export default function PhotoUpload({
         </span>
       )}
 
-      {canUpload && (
-        <>
+      {canEdit && (
+        <div className="flex flex-wrap gap-2">
           <input
             ref={inputRef}
             type="file"
@@ -126,17 +154,27 @@ export default function PhotoUpload({
           />
           <button
             type="button"
-            disabled={uploading}
+            disabled={uploading || deleting}
             onClick={() => inputRef.current?.click()}
             className="rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
           >
             {uploading
               ? "Envoi en cours..."
-              : plate?.status === "rejected"
-                ? "Reprendre une photo"
+              : plate
+                ? "🔄 Remplacer la photo"
                 : "📸 Prendre / envoyer la plaque"}
           </button>
-        </>
+          {plate && (
+            <button
+              type="button"
+              disabled={uploading || deleting}
+              onClick={handleDelete}
+              className="rounded-lg border border-red-500/40 px-4 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 disabled:opacity-60"
+            >
+              {deleting ? "Suppression..." : "🗑️ Supprimer"}
+            </button>
+          )}
+        </div>
       )}
 
       {error && (

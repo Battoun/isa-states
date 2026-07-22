@@ -171,11 +171,16 @@ create policy "users can submit their own plate"
   to authenticated
   with check (user_id = auth.uid() and status = 'pending');
 
-create policy "users can resubmit a rejected plate"
+create policy "users can edit their own unapproved plate"
   on public.plates for update
   to authenticated
-  using (user_id = auth.uid() and status = 'rejected')
+  using (user_id = auth.uid() and status <> 'approved')
   with check (user_id = auth.uid() and status = 'pending');
+
+create policy "users can delete their own unapproved plate"
+  on public.plates for delete
+  to authenticated
+  using (user_id = auth.uid() and status <> 'approved');
 
 create policy "admins can review plates"
   on public.plates for update
