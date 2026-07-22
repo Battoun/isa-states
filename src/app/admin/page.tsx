@@ -18,11 +18,17 @@ export default async function AdminPage() {
     redirect("/dashboard");
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("plates")
-    .select("id, photo_path, created_at, status, profiles(username), states(name, code)")
+    .select(
+      "id, photo_path, created_at, status, profiles!plates_user_id_fkey(username), states(name, code)"
+    )
     .eq("status", "pending")
     .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load pending plates", error);
+  }
 
   const pending = (data ?? []) as unknown as PendingPlate[];
 

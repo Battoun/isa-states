@@ -40,6 +40,34 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <details className="group mb-8 rounded-2xl border border-amber-600/30 bg-amber-500/5 p-5 open:pb-5">
+        <summary className="cursor-pointer list-none text-sm font-semibold text-amber-400 marker:hidden">
+          📜 Règles du jeu{" "}
+          <span className="text-amber-500/70 group-open:hidden">
+            (clique pour afficher)
+          </span>
+        </summary>
+        <ul className="mt-3 flex flex-col gap-2 text-sm text-slate-300">
+          <li>
+            📸 La photo doit être une <strong>vraie plaque</strong>, vue en vrai sur
+            un véhicule (route, parking...) — pas une photo prise en concession, en
+            magasin, ni une plaque décorative ou d&apos;exposition.
+          </li>
+          <li>
+            🚫 Pas de photo trouvée sur internet ou réutilisée : elle doit être prise
+            par toi, pendant le roadtrip.
+          </li>
+          <li>
+            ✅ Chaque photo est vérifiée par un admin avant de valider les 50 points.
+            Si elle est refusée, tu peux en reprendre une nouvelle.
+          </li>
+          <li>
+            🧠 Le quiz (2 questions, 25 pts chacune) se débloque juste après l&apos;envoi
+            de la photo, une seule tentative par question.
+          </li>
+        </ul>
+      </details>
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {states.map((state) => (
           <StateCard
