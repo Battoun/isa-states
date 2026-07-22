@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { computeRarityMap, RARITY_LABEL, RARITY_STYLE } from "@/lib/geo";
 import type { PlateRow, QuestionType, QuizAnswerRow, StateRow } from "@/types/database";
 import PhotoUpload from "@/components/PhotoUpload";
 import Quiz from "@/components/Quiz";
@@ -46,15 +47,22 @@ export default async function StatePage({
     ? supabase.storage.from("plates").getPublicUrl(plate.photo_path).data.publicUrl
     : null;
 
+  const rarity = computeRarityMap(allStates)[state.code]?.rarity ?? "commun";
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <Link href="/dashboard" className="text-sm text-sky-400 hover:text-sky-300">
         ← Retour à ma collection
       </Link>
 
-      <h1 className="mt-3 text-2xl font-bold text-slate-50">
+      <h1 className="mt-3 flex flex-wrap items-center gap-2 text-2xl font-bold text-slate-50">
         {state.name}{" "}
         <span className="font-mono text-lg text-slate-400">({state.code})</span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${RARITY_STYLE[rarity]}`}
+        >
+          {RARITY_LABEL[rarity]}
+        </span>
       </h1>
 
       <section className="mt-6">

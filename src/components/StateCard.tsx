@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { StateProgress } from "@/lib/scoring";
 import { MAX_POINTS_PER_STATE } from "@/lib/scoring";
+import type { Rarity } from "@/lib/geo";
+import { RARITY_LABEL, RARITY_STYLE } from "@/lib/geo";
 
 const STATUS_STYLES: Record<StateProgress["plateStatus"], string> = {
   none: "border-slate-800 bg-slate-900/40",
@@ -20,10 +22,12 @@ export default function StateCard({
   code,
   name,
   progress,
+  rarity,
 }: {
   code: string;
   name: string;
   progress: StateProgress;
+  rarity: Rarity;
 }) {
   const quizAnswered =
     (progress.capitalCorrect !== null ? 1 : 0) +
@@ -35,9 +39,14 @@ export default function StateCard({
       className={`flex flex-col gap-2 rounded-xl border p-3 transition hover:border-sky-500/60 hover:bg-slate-800/40 ${STATUS_STYLES[progress.plateStatus]}`}
     >
       <div className="flex items-start justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-mono text-slate-400">{code}</p>
           <p className="font-semibold leading-tight text-slate-50">{name}</p>
+          <span
+            className={`mt-1 inline-block w-fit rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${RARITY_STYLE[rarity]}`}
+          >
+            {RARITY_LABEL[rarity]}
+          </span>
         </div>
         <span className="rounded-full bg-slate-950/60 px-2 py-0.5 text-xs font-bold text-slate-200">
           {progress.points}/{MAX_POINTS_PER_STATE}

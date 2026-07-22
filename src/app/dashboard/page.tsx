@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { computeScores, MAX_POINTS_PER_STATE } from "@/lib/scoring";
+import { computeRarityMap } from "@/lib/geo";
 import type { PlateRow, QuizAnswerRow, StateRow } from "@/types/database";
 import StateCard from "@/components/StateCard";
 import ProgressBar from "@/components/ProgressBar";
@@ -22,6 +23,8 @@ export default async function DashboardPage() {
   const totalPoints = myScore?.totalPoints ?? 0;
   const statesCompleted = myScore?.statesCompleted ?? 0;
   const maxTotal = states.length * MAX_POINTS_PER_STATE;
+
+  const rarityMap = computeRarityMap(states);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -95,6 +98,7 @@ export default async function DashboardPage() {
             key={state.code}
             code={state.code}
             name={state.name}
+            rarity={rarityMap[state.code].rarity}
             progress={
               myScore?.perState[state.code] ?? {
                 plateStatus: "none",
