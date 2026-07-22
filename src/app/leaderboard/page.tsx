@@ -1,14 +1,14 @@
 import { requireUser } from "@/lib/auth";
 import {
   computeScores,
-  MAX_POINTS_PER_STATE,
+  maxTotalPoints,
   MAX_QUIZ_POINTS_PER_STATE,
   POINTS_PER_ANSWER,
-  POINTS_PER_PLATE,
 } from "@/lib/scoring";
 import type { PlateRow, ProfileRow, QuizAnswerRow, StateRow } from "@/types/database";
 import {
   computeRarityMap,
+  PLATE_POINTS_BY_RARITY,
   RARITY_EMOJI,
   RARITY_LABEL,
   RARITY_ORDER,
@@ -32,8 +32,9 @@ export default async function LeaderboardPage() {
   const plates = (platesRes.data ?? []) as PlateRow[];
   const answers = (answersRes.data ?? []) as QuizAnswerRow[];
 
-  const scores = computeScores(plates, answers);
-  const maxTotal = states.length * MAX_POINTS_PER_STATE;
+  const rarityMap = computeRarityMap(states);
+  const scores = computeScores(plates, answers, rarityMap);
+  const maxTotal = maxTotalPoints(rarityMap);
 
   const ranking = profiles
     .map((profile) => ({
@@ -43,6 +44,7 @@ export default async function LeaderboardPage() {
         statesCompleted: 0,
         platePoints: 0,
         quizPoints: 0,
+        platesApprovedCount: 0,
       },
     }))
     .sort((a, b) => b.score.totalPoints - a.score.totalPoints);
@@ -53,7 +55,7 @@ export default async function LeaderboardPage() {
       id: profile.id,
       username: profile.username,
       points: score.platePoints,
-      count: score.platePoints / POINTS_PER_PLATE,
+      count: score.platesApprovedCount,
       isCurrentUser: profile.id === user.id,
     }));
 
@@ -67,10 +69,11 @@ export default async function LeaderboardPage() {
       isCurrentUser: profile.id === user.id,
     }));
 
-  const maxPlatePoints = states.length * POINTS_PER_PLATE;
+  const maxPlatePoints = states.reduce(
+    (sum, s) => sum + PLATE_POINTS_BY_RARITY[rarityMap[s.code].rarity],
+    0
+  );
   const maxQuizPoints = states.length * MAX_QUIZ_POINTS_PER_STATE;
-
-  const rarityMap = computeRarityMap(states);
 
   const tierTotals: Record<Rarity, number> = {
     commun: 0,

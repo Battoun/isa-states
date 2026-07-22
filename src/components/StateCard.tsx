@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { StateProgress } from "@/lib/scoring";
-import { MAX_POINTS_PER_STATE } from "@/lib/scoring";
 import type { Rarity } from "@/lib/geo";
 import { RARITY_LABEL, RARITY_STYLE } from "@/lib/geo";
 
@@ -55,7 +54,7 @@ export default function StateCard({
           </span>
         </div>
         <span className="rounded-full bg-slate-950/60 px-2 py-0.5 text-xs font-bold text-slate-200">
-          {progress.points}/{MAX_POINTS_PER_STATE}
+          {progress.points}/{progress.maxPoints}
         </span>
       </div>
       <p className={`text-xs ${needsQuiz ? "font-semibold text-amber-400" : "text-slate-400"}`}>

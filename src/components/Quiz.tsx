@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { buildQuestions, type QuizQuestion } from "@/lib/quiz";
+import { POINTS_PER_ANSWER } from "@/lib/scoring";
 import type { QuestionType, StateRow } from "@/types/database";
 
 export default function Quiz({
@@ -81,7 +82,9 @@ export default function Quiz({
                   result ? "text-emerald-400" : "text-red-400"
                 }`}
               >
-                {result ? "✅ Bonne réponse ! +25 pts" : "❌ Mauvaise réponse."}
+                {result
+                  ? `✅ Bonne réponse ! +${POINTS_PER_ANSWER} pts`
+                  : "❌ Mauvaise réponse."}
               </p>
             )}
           </div>

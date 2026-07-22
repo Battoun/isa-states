@@ -1,6 +1,12 @@
 import { requireUser } from "@/lib/auth";
-import { computeScores, MAX_POINTS_PER_STATE } from "@/lib/scoring";
-import { computeRarityMap } from "@/lib/geo";
+import { computeScores, maxTotalPoints, MAX_POINTS_BY_RARITY } from "@/lib/scoring";
+import {
+  computeRarityMap,
+  RARITY_EMOJI,
+  RARITY_LABEL,
+  RARITY_ORDER,
+  PLATE_POINTS_BY_RARITY,
+} from "@/lib/geo";
 import type { PlateRow, QuizAnswerRow, StateRow } from "@/types/database";
 import StateCard from "@/components/StateCard";
 import ProgressBar from "@/components/ProgressBar";
@@ -18,13 +24,12 @@ export default async function DashboardPage() {
   const plates = (platesRes.data ?? []) as PlateRow[];
   const answers = (answersRes.data ?? []) as QuizAnswerRow[];
 
-  const scores = computeScores(plates, answers);
+  const rarityMap = computeRarityMap(states);
+  const scores = computeScores(plates, answers, rarityMap);
   const myScore = scores[user.id];
   const totalPoints = myScore?.totalPoints ?? 0;
   const statesCompleted = myScore?.statesCompleted ?? 0;
-  const maxTotal = states.length * MAX_POINTS_PER_STATE;
-
-  const rarityMap = computeRarityMap(states);
+  const maxTotal = maxTotalPoints(rarityMap);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -68,8 +73,16 @@ export default async function DashboardPage() {
             propre photo de chaque plaque, pas celle d&apos;un autre participant.
           </li>
           <li>
-            ✅ Chaque photo est vérifiée par un admin avant de valider les 50 points.
+            ✅ Chaque photo est vérifiée par un admin avant de valider les points.
             Si elle est refusée, tu peux en reprendre une nouvelle.
+          </li>
+          <li className="flex flex-wrap gap-x-3 gap-y-1">
+            {RARITY_ORDER.map((tier) => (
+              <span key={tier}>
+                {RARITY_EMOJI[tier]} {RARITY_LABEL[tier]} :{" "}
+                <strong>{PLATE_POINTS_BY_RARITY[tier]} pts</strong>
+              </span>
+            ))}
           </li>
         </ul>
 
@@ -78,7 +91,7 @@ export default async function DashboardPage() {
         </p>
         <ul className="mt-2 flex flex-col gap-2 text-sm text-slate-300">
           <li>
-            🧠 Le quiz (2 questions, 25 pts chacune) se débloque juste après l&apos;envoi
+            🧠 Le quiz (2 questions, 10 pts chacune) se débloque juste après l&apos;envoi
             de la photo, une seule tentative par question.
           </li>
           <li>
@@ -105,6 +118,7 @@ export default async function DashboardPage() {
                 capitalCorrect: null,
                 populationCorrect: null,
                 points: 0,
+                maxPoints: MAX_POINTS_BY_RARITY[rarityMap[state.code].rarity],
               }
             }
           />

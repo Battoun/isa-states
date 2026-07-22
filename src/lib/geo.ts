@@ -25,6 +25,14 @@ export const RARITY_EMOJI: Record<Rarity, string> = {
   legendaire: "🟡",
 };
 
+// Plate points scale with how hard a state is to spot on this leg of the trip.
+export const PLATE_POINTS_BY_RARITY: Record<Rarity, number> = {
+  commun: 30,
+  rare: 40,
+  tres_rare: 60,
+  legendaire: 80,
+};
+
 // Approximate coordinates of each state capital, used only to rank states by
 // distance from the current leg of the roadtrip (Las Vegas hub: CA/AZ/UT/NV).
 const STATE_COORDS: Record<string, { lat: number; lng: number }> = {

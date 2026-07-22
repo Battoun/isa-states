@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { computeRarityMap, RARITY_LABEL, RARITY_STYLE } from "@/lib/geo";
+import { computeRarityMap, PLATE_POINTS_BY_RARITY, RARITY_LABEL, RARITY_STYLE } from "@/lib/geo";
+import { POINTS_PER_ANSWER } from "@/lib/scoring";
 import type { PlateRow, QuestionType, QuizAnswerRow, StateRow } from "@/types/database";
 import PhotoUpload from "@/components/PhotoUpload";
 import Quiz from "@/components/Quiz";
@@ -67,19 +68,20 @@ export default async function StatePage({
 
       <section className="mt-6">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          1. Plaque d&apos;immatriculation · 50 pts
+          1. Plaque d&apos;immatriculation · {PLATE_POINTS_BY_RARITY[rarity]} pts
         </h2>
         <PhotoUpload
           stateCode={state.code}
           userId={user.id}
           plate={plate}
           photoUrl={photoUrl}
+          platePoints={PLATE_POINTS_BY_RARITY[rarity]}
         />
       </section>
 
       <section className="mt-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-          2. Quiz · 25 pts par bonne réponse
+          2. Quiz · {POINTS_PER_ANSWER} pts par bonne réponse
         </h2>
         {plate ? (
           <Quiz

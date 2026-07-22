@@ -5,31 +5,41 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { PlateRow, PlateStatus } from "@/types/database";
 
-const STATUS_BADGE: Record<PlateStatus, { label: string; className: string }> = {
-  pending: {
-    label: "En attente de validation",
-    className: "bg-amber-500/15 text-amber-400",
-  },
-  approved: {
-    label: "Plaque validée · +50 pts",
-    className: "bg-emerald-500/15 text-emerald-400",
-  },
-  rejected: {
-    label: "Photo refusée · reprends une photo",
-    className: "bg-red-500/15 text-red-400",
-  },
-};
+function getStatusBadge(
+  status: PlateStatus,
+  platePoints: number
+): { label: string; className: string } {
+  switch (status) {
+    case "pending":
+      return {
+        label: "En attente de validation",
+        className: "bg-amber-500/15 text-amber-400",
+      };
+    case "approved":
+      return {
+        label: `Plaque validée · +${platePoints} pts`,
+        className: "bg-emerald-500/15 text-emerald-400",
+      };
+    case "rejected":
+      return {
+        label: "Photo refusée · reprends une photo",
+        className: "bg-red-500/15 text-red-400",
+      };
+  }
+}
 
 export default function PhotoUpload({
   stateCode,
   userId,
   plate,
   photoUrl,
+  platePoints,
 }: {
   stateCode: string;
   userId: string;
   plate: PlateRow | null;
   photoUrl: string | null;
+  platePoints: number;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -114,7 +124,7 @@ export default function PhotoUpload({
     }
   }
 
-  const badge = plate ? STATUS_BADGE[plate.status] : null;
+  const badge = plate ? getStatusBadge(plate.status, platePoints) : null;
   const displayUrl = localPreview ?? photoUrl;
 
   return (
