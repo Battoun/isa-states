@@ -47,7 +47,10 @@ export default async function DashboardPage() {
             (clique pour afficher)
           </span>
         </summary>
-        <ul className="mt-3 flex flex-col gap-2 text-sm text-slate-300">
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-amber-500/80">
+          Photos
+        </p>
+        <ul className="mt-2 flex flex-col gap-2 text-sm text-slate-300">
           <li>
             📸 La photo doit être une <strong>vraie plaque</strong>, vue en vrai sur
             un véhicule (route, parking...) — pas une photo prise en concession, en
@@ -61,9 +64,23 @@ export default async function DashboardPage() {
             ✅ Chaque photo est vérifiée par un admin avant de valider les 50 points.
             Si elle est refusée, tu peux en reprendre une nouvelle.
           </li>
+        </ul>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-amber-500/80">
+          Quiz
+        </p>
+        <ul className="mt-2 flex flex-col gap-2 text-sm text-slate-300">
           <li>
             🧠 Le quiz (2 questions, 25 pts chacune) se débloque juste après l&apos;envoi
             de la photo, une seule tentative par question.
+          </li>
+          <li>
+            🙋 Réponds <strong>seul(e)</strong>, de tête — pas de question posée aux
+            autres participants ni de réponse soufflée.
+          </li>
+          <li>
+            🚫 Sans recherche Internet, sans Google, sans IA : c&apos;est le fair-play
+            qui fait le jeu, pas le score.
           </li>
         </ul>
       </details>
