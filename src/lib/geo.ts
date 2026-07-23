@@ -1,14 +1,21 @@
 import type { StateRow } from "@/types/database";
 
-export type Rarity = "commun" | "rare" | "tres_rare" | "legendaire";
+export type Rarity = "commun" | "rare" | "tres_rare" | "legendaire" | "ultra_rare";
 
-export const RARITY_ORDER: Rarity[] = ["commun", "rare", "tres_rare", "legendaire"];
+export const RARITY_ORDER: Rarity[] = [
+  "commun",
+  "rare",
+  "tres_rare",
+  "legendaire",
+  "ultra_rare",
+];
 
 export const RARITY_LABEL: Record<Rarity, string> = {
   commun: "Commun",
   rare: "Rare",
   tres_rare: "Très rare",
   legendaire: "Légendaire",
+  ultra_rare: "Ultra rare",
 };
 
 export const RARITY_STYLE: Record<Rarity, string> = {
@@ -16,6 +23,7 @@ export const RARITY_STYLE: Record<Rarity, string> = {
   rare: "bg-sky-500/15 text-sky-400",
   tres_rare: "bg-purple-500/15 text-purple-400",
   legendaire: "bg-amber-500/15 text-amber-400",
+  ultra_rare: "bg-fuchsia-500/15 text-fuchsia-300",
 };
 
 export const RARITY_EMOJI: Record<Rarity, string> = {
@@ -23,6 +31,7 @@ export const RARITY_EMOJI: Record<Rarity, string> = {
   rare: "🔵",
   tres_rare: "🟣",
   legendaire: "🟡",
+  ultra_rare: "💎",
 };
 
 // Plate points scale with how hard a state is to spot on this leg of the trip.
@@ -31,6 +40,7 @@ export const PLATE_POINTS_BY_RARITY: Record<Rarity, number> = {
   rare: 40,
   tres_rare: 60,
   legendaire: 80,
+  ultra_rare: 130,
 };
 
 // Approximate coordinates of each state capital, used only to rank states by
@@ -113,9 +123,11 @@ export interface StateRarity {
 
 /**
  * Ranks states by great-circle distance from the roadtrip's current hub and
- * splits them into 4 rarity tiers. Hawaii and Alaska are forced to
- * "legendaire" regardless of straight-line distance since they're physically
- * disconnected from the driving route.
+ * splits them into 4 rarity tiers. Maine, Hawaii and Alaska are then forced
+ * into a 5th "ultra_rare" tier above legendaire: Hawaii and Alaska because
+ * they're physically disconnected from the driving route, and Maine because
+ * it's the single farthest contiguous state and a classic "impossible find"
+ * in roadtrip plate-spotting.
  */
 export function computeRarityMap(
   states: StateRow[]
@@ -141,10 +153,11 @@ export function computeRarityMap(
     tierByCode.set(entry.code, tier);
   });
 
-  // Non-contiguous states: no one drives there, so they stay legendary
-  // regardless of where the quartile split would otherwise put them.
-  tierByCode.set("HI", "legendaire");
-  tierByCode.set("AK", "legendaire");
+  // The three "impossible finds" of the trip stay ultra rare regardless of
+  // where the quartile split would otherwise put them.
+  tierByCode.set("ME", "ultra_rare");
+  tierByCode.set("HI", "ultra_rare");
+  tierByCode.set("AK", "ultra_rare");
 
   const result: Record<string, StateRarity> = {};
   for (const entry of withDistance) {

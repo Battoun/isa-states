@@ -75,12 +75,13 @@ export default async function LeaderboardPage() {
   );
   const maxQuizPoints = states.length * MAX_QUIZ_POINTS_PER_STATE;
 
-  const tierTotals: Record<Rarity, number> = {
-    commun: 0,
-    rare: 0,
-    tres_rare: 0,
-    legendaire: 0,
-  };
+  const emptyTierCounts = (): Record<Rarity, number> =>
+    Object.fromEntries(RARITY_ORDER.map((tier) => [tier, 0])) as Record<
+      Rarity,
+      number
+    >;
+
+  const tierTotals = emptyTierCounts();
   for (const state of states) {
     tierTotals[rarityMap[state.code].rarity] += 1;
   }
@@ -91,12 +92,7 @@ export default async function LeaderboardPage() {
     const tier = rarityMap[plate.state_code]?.rarity;
     if (!tier) continue;
     if (!tierCountsByUser[plate.user_id]) {
-      tierCountsByUser[plate.user_id] = {
-        commun: 0,
-        rare: 0,
-        tres_rare: 0,
-        legendaire: 0,
-      };
+      tierCountsByUser[plate.user_id] = emptyTierCounts();
     }
     tierCountsByUser[plate.user_id][tier] += 1;
   }
@@ -190,7 +186,7 @@ export default async function LeaderboardPage() {
         rareté.
       </p>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rarityRankings.map(({ tier, entries }) => (
           <MiniLeaderboard
             key={tier}
