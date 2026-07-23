@@ -121,6 +121,31 @@ export interface StateRarity {
   distanceKm: number;
 }
 
+// Geographic center of the contiguous 48 states (near Lebanon, Kansas),
+// used only to split states into 4 rough quadrants for a map-game hint.
+const US_CENTER = { lat: 39.8333, lng: -98.5833 };
+
+/**
+ * Gives a rough quadrant hint ("Nord-Ouest", "Sud-Est"...) for a state,
+ * shown after a wrong first try on the map challenge. Alaska and Hawaii get
+ * a dedicated hint since they fall outside the contiguous-states quadrants.
+ */
+export function getDirectionHint(stateCode: string): string {
+  if (stateCode === "AK") {
+    return "tout au nord-ouest, séparé du reste du pays";
+  }
+  if (stateCode === "HI") {
+    return "un archipel isolé en plein océan Pacifique";
+  }
+
+  const coord = STATE_COORDS[stateCode];
+  if (!coord) return "";
+
+  const northSouth = coord.lat >= US_CENTER.lat ? "Nord" : "Sud";
+  const eastWest = coord.lng >= US_CENTER.lng ? "Est" : "Ouest";
+  return `quart ${northSouth}-${eastWest} des USA`;
+}
+
 /**
  * Ranks states by great-circle distance from the roadtrip's current hub and
  * splits them into 4 rarity tiers. Maine, Hawaii and Alaska are then forced

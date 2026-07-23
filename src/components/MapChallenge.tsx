@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import USAMap, { type USAMapClickEvent, type USAMapCustomize } from "react-usa-map";
 import { createClient } from "@/lib/supabase/client";
 import { MAP_POINTS_FIRST_TRY, MAP_POINTS_SECOND_TRY } from "@/lib/scoring";
+import { getDirectionHint } from "@/lib/geo";
 
 interface MapAttempt {
   attempt: number;
@@ -79,7 +80,8 @@ export default function MapChallenge({
         Clique sur <strong>{stateName}</strong> sur la carte.
         {!isDone && attempt1 && (
           <span className="ml-2 font-semibold text-amber-400">
-            Raté au 1er essai, dernière chance !
+            Raté au 1er essai — indice : {getDirectionHint(stateCode)}. Dernière
+            chance !
           </span>
         )}
       </p>
