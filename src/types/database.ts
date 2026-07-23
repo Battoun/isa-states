@@ -1,5 +1,5 @@
 export type PlateStatus = "pending" | "approved" | "rejected";
-export type QuestionType = "capital" | "population";
+export type QuestionType = "capital" | "population" | "map";
 
 export type StateRow = {
   code: string;
@@ -32,6 +32,7 @@ export type QuizAnswerRow = {
   user_id: string;
   state_code: string;
   question_type: QuestionType;
+  attempt: number;
   is_correct: boolean;
   created_at: string;
 };

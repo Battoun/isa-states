@@ -189,16 +189,20 @@ create policy "admins can review plates"
   with check (true);
 
 -- ----------------------------------------------------------------------------
--- 4. quiz_answers (one attempt per user per state per question type)
+-- 4. quiz_answers
+--    'capital' and 'population' allow a single attempt (attempt = 1).
+--    'map' allows up to 2 attempts: 30 pts if solved on attempt 1, 10 pts on
+--    attempt 2, 0 if both are wrong.
 -- ----------------------------------------------------------------------------
 create table if not exists public.quiz_answers (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
   state_code text not null references public.states (code),
-  question_type text not null check (question_type in ('capital', 'population')),
+  question_type text not null check (question_type in ('capital', 'population', 'map')),
+  attempt int not null default 1 check (attempt in (1, 2)),
   is_correct boolean not null,
   created_at timestamptz not null default now(),
-  unique (user_id, state_code, question_type)
+  unique (user_id, state_code, question_type, attempt)
 );
 
 alter table public.quiz_answers enable row level security;

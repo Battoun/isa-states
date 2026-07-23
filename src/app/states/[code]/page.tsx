@@ -2,10 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { computeRarityMap, PLATE_POINTS_BY_RARITY, RARITY_LABEL, RARITY_STYLE } from "@/lib/geo";
-import { POINTS_PER_ANSWER } from "@/lib/scoring";
+import {
+  MAP_POINTS_FIRST_TRY,
+  MAP_POINTS_SECOND_TRY,
+  POINTS_PER_ANSWER,
+} from "@/lib/scoring";
 import type { PlateRow, QuestionType, QuizAnswerRow, StateRow } from "@/types/database";
 import PhotoUpload from "@/components/PhotoUpload";
 import Quiz from "@/components/Quiz";
+import MapChallenge from "@/components/MapChallenge";
 
 export default async function StatePage({
   params,
@@ -41,8 +46,14 @@ export default async function StatePage({
 
   const answeredTypes: Partial<Record<QuestionType, boolean>> = {};
   for (const answer of answers) {
-    answeredTypes[answer.question_type] = answer.is_correct;
+    if (answer.question_type !== "map") {
+      answeredTypes[answer.question_type] = answer.is_correct;
+    }
   }
+
+  const mapAttempts = answers
+    .filter((a) => a.question_type === "map")
+    .map((a) => ({ attempt: a.attempt, isCorrect: a.is_correct }));
 
   const photoUrl = plate
     ? supabase.storage.from("plates").getPublicUrl(plate.photo_path).data.publicUrl
@@ -93,6 +104,25 @@ export default async function StatePage({
         ) : (
           <p className="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-4 text-sm text-slate-400">
             Envoie d&apos;abord une photo de la plaque pour débloquer le quiz.
+          </p>
+        )}
+      </section>
+
+      <section className="mt-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
+          3. Localise l&apos;état sur la carte · {MAP_POINTS_FIRST_TRY} pts (1er essai) /{" "}
+          {MAP_POINTS_SECOND_TRY} pts (2e essai)
+        </h2>
+        {plate ? (
+          <MapChallenge
+            userId={user.id}
+            stateCode={state.code}
+            stateName={state.name}
+            attempts={mapAttempts}
+          />
+        ) : (
+          <p className="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-4 text-sm text-slate-400">
+            Envoie d&apos;abord une photo de la plaque pour débloquer ce défi.
           </p>
         )}
       </section>

@@ -1,7 +1,10 @@
 import { requireUser } from "@/lib/auth";
 import {
+  CHALLENGES_PER_STATE,
   computeScores,
   maxTotalPoints,
+  MAP_POINTS_FIRST_TRY,
+  MAP_POINTS_SECOND_TRY,
   MAX_QUIZ_POINTS_PER_STATE,
   POINTS_PER_ANSWER,
 } from "@/lib/scoring";
@@ -16,6 +19,7 @@ import {
 } from "@/lib/geo";
 import ProgressBar from "@/components/ProgressBar";
 import MiniLeaderboard from "@/components/MiniLeaderboard";
+import MapLeaderboard from "@/components/MapLeaderboard";
 
 export default async function LeaderboardPage() {
   const { supabase, user } = await requireUser();
@@ -109,6 +113,32 @@ export default async function LeaderboardPage() {
       .sort((a, b) => b.points - a.points),
   }));
 
+  const mapStatsByUser: Record<string, { firstTry: number; secondTry: number }> = {};
+  for (const answer of answers) {
+    if (answer.question_type !== "map" || !answer.is_correct) continue;
+    if (!mapStatsByUser[answer.user_id]) {
+      mapStatsByUser[answer.user_id] = { firstTry: 0, secondTry: 0 };
+    }
+    if (answer.attempt === 1) mapStatsByUser[answer.user_id].firstTry += 1;
+    else mapStatsByUser[answer.user_id].secondTry += 1;
+  }
+
+  const mapRanking = [...ranking]
+    .map(({ profile }) => {
+      const stats = mapStatsByUser[profile.id] ?? { firstTry: 0, secondTry: 0 };
+      return {
+        id: profile.id,
+        username: profile.username,
+        firstTry: stats.firstTry,
+        secondTry: stats.secondTry,
+        points: stats.firstTry * MAP_POINTS_FIRST_TRY + stats.secondTry * MAP_POINTS_SECOND_TRY,
+        isCurrentUser: profile.id === user.id,
+      };
+    })
+    .sort((a, b) => b.points - a.points);
+
+  const maxMapPoints = states.length * MAP_POINTS_FIRST_TRY;
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-2xl font-bold text-slate-50">Classement</h1>
@@ -174,7 +204,7 @@ export default async function LeaderboardPage() {
         <MiniLeaderboard
           title="🧠 Classement quiz"
           maxPoints={maxQuizPoints}
-          totalCount={states.length * 2}
+          totalCount={states.length * CHALLENGES_PER_STATE}
           countLabel="bonnes réponses"
           entries={quizRanking}
         />
@@ -195,6 +225,15 @@ export default async function LeaderboardPage() {
             entries={entries}
           />
         ))}
+      </div>
+
+      <h2 className="mt-10 text-lg font-bold text-slate-50">Classement carte</h2>
+      <p className="mt-1 text-sm text-slate-400">
+        🥇 = trouvé du 1er coup (30 pts) · 🥈 = trouvé du 2e coup (10 pts).
+      </p>
+
+      <div className="mt-4">
+        <MapLeaderboard entries={mapRanking} maxPoints={maxMapPoints} />
       </div>
     </div>
   );

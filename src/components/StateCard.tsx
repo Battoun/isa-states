@@ -28,11 +28,15 @@ export default function StateCard({
   progress: StateProgress;
   rarity: Rarity;
 }) {
-  const quizAnswered =
-    (progress.capitalCorrect !== null ? 1 : 0) +
-    (progress.populationCorrect !== null ? 1 : 0);
+  const challengeResults = [
+    progress.capitalCorrect,
+    progress.populationCorrect,
+    progress.mapCorrect,
+  ];
+  const quizAnswered = challengeResults.filter((c) => c !== null).length;
 
-  const needsQuiz = progress.plateStatus === "approved" && quizAnswered < 2;
+  const needsQuiz =
+    progress.plateStatus === "approved" && quizAnswered < challengeResults.length;
 
   return (
     <Link
@@ -61,23 +65,22 @@ export default function StateCard({
         {needsQuiz ? "⚠️ Quiz à faire !" : STATUS_LABEL[progress.plateStatus]}
       </p>
       <div className="mt-auto flex gap-1">
-        {[0, 1].map((i) => {
-          const correct = i === 0 ? progress.capitalCorrect : progress.populationCorrect;
-          return (
-            <span
-              key={i}
-              className={`h-1.5 flex-1 rounded-full ${
-                correct === true
-                  ? "bg-emerald-400"
-                  : correct === false
-                    ? "bg-red-500"
-                    : "bg-slate-700"
-              }`}
-            />
-          );
-        })}
+        {challengeResults.map((correct, i) => (
+          <span
+            key={i}
+            className={`h-1.5 flex-1 rounded-full ${
+              correct === true
+                ? "bg-emerald-400"
+                : correct === false
+                  ? "bg-red-500"
+                  : "bg-slate-700"
+            }`}
+          />
+        ))}
       </div>
-      <p className="text-[11px] text-slate-500">{quizAnswered}/2 questions</p>
+      <p className="text-[11px] text-slate-500">
+        {quizAnswered}/{challengeResults.length} défis
+      </p>
     </Link>
   );
 }

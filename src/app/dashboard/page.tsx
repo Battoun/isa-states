@@ -1,5 +1,12 @@
 import { requireUser } from "@/lib/auth";
-import { computeScores, maxTotalPoints, MAX_POINTS_BY_RARITY } from "@/lib/scoring";
+import {
+  computeScores,
+  maxTotalPoints,
+  MAP_POINTS_FIRST_TRY,
+  MAP_POINTS_SECOND_TRY,
+  MAX_POINTS_BY_RARITY,
+  POINTS_PER_ANSWER,
+} from "@/lib/scoring";
 import {
   computeRarityMap,
   RARITY_EMOJI,
@@ -91,15 +98,36 @@ export default async function DashboardPage() {
         </p>
         <ul className="mt-2 flex flex-col gap-2 text-sm text-slate-300">
           <li>
-            🧠 Le quiz (2 questions, 10 pts chacune) se débloque juste après l&apos;envoi
-            de la photo, une seule tentative par question.
+            🧠 2 questions par état (capitale, population), {POINTS_PER_ANSWER} pts
+            chacune, se débloquent juste après l&apos;envoi de la photo — une seule
+            tentative par question.
           </li>
+        </ul>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-amber-500/80">
+          Carte
+        </p>
+        <ul className="mt-2 flex flex-col gap-2 text-sm text-slate-300">
+          <li>
+            🗺️ Clique sur le bon état sur la carte des USA. Tu as{" "}
+            <strong>2 essais</strong> :{" "}
+            <strong>{MAP_POINTS_FIRST_TRY} pts</strong> si tu trouves du premier
+            coup, <strong>{MAP_POINTS_SECOND_TRY} pts</strong> si c&apos;est le
+            deuxième, 0 si les deux sont ratés.
+          </li>
+        </ul>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-amber-500/80">
+          Fair-play
+        </p>
+        <ul className="mt-2 flex flex-col gap-2 text-sm text-slate-300">
           <li>
             🙋 Réponds <strong>seul(e)</strong>, de tête — pas de question posée aux
             autres participants ni de réponse soufflée.
           </li>
           <li>
-            🚫 Sans recherche Internet, sans Google, sans IA : c&apos;est le fair-play
+            🚫 Sans recherche Internet, sans Google, sans IA, et sans regarder une
+            carte ou un atlas pour le défi de localisation : c&apos;est le fair-play
             qui fait le jeu, pas le score.
           </li>
         </ul>
@@ -117,6 +145,8 @@ export default async function DashboardPage() {
                 plateStatus: "none",
                 capitalCorrect: null,
                 populationCorrect: null,
+                mapCorrect: null,
+                mapPoints: 0,
                 points: 0,
                 maxPoints: MAX_POINTS_BY_RARITY[rarityMap[state.code].rarity],
               }
