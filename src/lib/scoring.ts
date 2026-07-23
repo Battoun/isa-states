@@ -32,6 +32,7 @@ export interface UserScore {
   quizPoints: number;
   totalPoints: number;
   platesApprovedCount: number;
+  correctAnswersCount: number;
   statesCompleted: number;
   perState: Record<string, StateProgress>;
 }
@@ -64,6 +65,7 @@ export function computeScores(
         quizPoints: 0,
         totalPoints: 0,
         platesApprovedCount: 0,
+        correctAnswersCount: 0,
         statesCompleted: 0,
         perState: {},
       };
@@ -153,6 +155,11 @@ export function computeScores(
         (state.capitalCorrect ? POINTS_PER_ANSWER : 0) +
         (state.populationCorrect ? POINTS_PER_ANSWER : 0) +
         state.mapPoints;
+
+      score.correctAnswersCount +=
+        (state.capitalCorrect ? 1 : 0) +
+        (state.populationCorrect ? 1 : 0) +
+        (state.mapCorrect ? 1 : 0);
 
       const quizFinished =
         state.capitalCorrect !== null &&

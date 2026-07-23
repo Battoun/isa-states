@@ -121,29 +121,48 @@ export interface StateRarity {
   distanceKm: number;
 }
 
-// Geographic center of the contiguous 48 states (near Lebanon, Kansas),
-// used only to split states into 4 rough quadrants for a map-game hint.
-const US_CENTER = { lat: 39.8333, lng: -98.5833 };
+const COMPASS_8 = [
+  "Nord",
+  "Nord-Est",
+  "Est",
+  "Sud-Est",
+  "Sud",
+  "Sud-Ouest",
+  "Ouest",
+  "Nord-Ouest",
+];
+
+function bearingFrom(
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number }
+): number {
+  const dLat = to.lat - from.lat;
+  const dLng = (to.lng - from.lng) * Math.cos((from.lat * Math.PI) / 180);
+  const angle = (Math.atan2(dLng, dLat) * 180) / Math.PI;
+  return (angle + 360) % 360;
+}
 
 /**
- * Gives a rough quadrant hint ("Nord-Ouest", "Sud-Est"...) for a state,
+ * Gives a direction + distance hint relative to Las Vegas (the trip's own
+ * hub, so players can reason from a place they actually know) for a state,
  * shown after a wrong first try on the map challenge. Alaska and Hawaii get
- * a dedicated hint since they fall outside the contiguous-states quadrants.
+ * a dedicated hint since a bearing from Las Vegas isn't meaningful for them.
  */
 export function getDirectionHint(stateCode: string): string {
   if (stateCode === "AK") {
-    return "tout au nord-ouest, séparé du reste du pays";
+    return "tout au nord-ouest, séparé du reste du pays (pas la peine de chercher près de Las Vegas)";
   }
   if (stateCode === "HI") {
-    return "un archipel isolé en plein océan Pacifique";
+    return "un archipel isolé en plein océan Pacifique (pas la peine de chercher près de Las Vegas)";
   }
 
   const coord = STATE_COORDS[stateCode];
   if (!coord) return "";
 
-  const northSouth = coord.lat >= US_CENTER.lat ? "Nord" : "Sud";
-  const eastWest = coord.lng >= US_CENTER.lng ? "Est" : "Ouest";
-  return `quart ${northSouth}-${eastWest} des USA`;
+  const bearing = bearingFrom(ROADTRIP_ORIGIN, coord);
+  const direction = COMPASS_8[Math.round(bearing / 45) % 8];
+  const distanceKm = Math.round(haversineKm(ROADTRIP_ORIGIN, coord) / 100) * 100;
+  return `à environ ${distanceKm} km au ${direction} de Las Vegas`;
 }
 
 /**

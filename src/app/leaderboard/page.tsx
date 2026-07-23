@@ -6,7 +6,6 @@ import {
   MAP_POINTS_FIRST_TRY,
   MAP_POINTS_SECOND_TRY,
   MAX_QUIZ_POINTS_PER_STATE,
-  POINTS_PER_ANSWER,
 } from "@/lib/scoring";
 import type { PlateRow, ProfileRow, QuizAnswerRow, StateRow } from "@/types/database";
 import {
@@ -49,6 +48,7 @@ export default async function LeaderboardPage() {
         platePoints: 0,
         quizPoints: 0,
         platesApprovedCount: 0,
+        correctAnswersCount: 0,
       },
     }))
     .sort((a, b) => b.score.totalPoints - a.score.totalPoints);
@@ -69,7 +69,7 @@ export default async function LeaderboardPage() {
       id: profile.id,
       username: profile.username,
       points: score.quizPoints,
-      count: score.quizPoints / POINTS_PER_ANSWER,
+      count: score.correctAnswersCount,
       isCurrentUser: profile.id === user.id,
     }));
 
