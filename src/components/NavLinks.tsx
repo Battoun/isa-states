@@ -24,6 +24,7 @@ export default function NavLinks({
   const links: NavLink[] = [
     { href: "/dashboard", label: "Ma collection" },
     { href: "/leaderboard", label: "Classement" },
+    { href: "/gallery", label: "Galerie" },
     ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
 

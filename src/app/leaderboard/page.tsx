@@ -16,6 +16,7 @@ import {
   RARITY_ORDER,
   type Rarity,
 } from "@/lib/geo";
+import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
 import MiniLeaderboard from "@/components/MiniLeaderboard";
 import MapLeaderboard from "@/components/MapLeaderboard";
@@ -148,9 +149,10 @@ export default async function LeaderboardPage() {
 
       <div className="mt-6 flex flex-col gap-3">
         {ranking.map(({ profile, score }, index) => (
-          <div
+          <Link
             key={profile.id}
-            className={`rounded-xl border p-4 ${
+            href={`/leaderboard/${profile.id}`}
+            className={`block rounded-xl border p-4 transition hover:border-sky-500/60 ${
               profile.id === user.id
                 ? "border-sky-500/60 bg-sky-500/5"
                 : "border-slate-800 bg-slate-900/40"
@@ -180,7 +182,7 @@ export default async function LeaderboardPage() {
                 {score.statesCompleted}/{states.length} états
               </span>
             </div>
-          </div>
+          </Link>
         ))}
 
         {ranking.length === 0 && (
